@@ -1,7 +1,12 @@
 #include "include/tcpSocket.h"
 
+tcpSocket::tcpSocket(){
+	their_addr_size = sizeof their_addr;
+}
+
 tcpSocket::tcpSocket(int newfd){
 	sockfd = newfd;
+	their_addr_size = sizeof their_addr;
 }
 
 string tcpSocket::getIp(){
@@ -21,18 +26,18 @@ int tcpSocket::getSocket(){
 }
 
 void tcpSocket::setIp(string ip){
-	ip = ip;
+	this->ip = ip;
 }
 
 void tcpSocket::setPort(unsigned short port){
-	port = port;
+	this->port = port;
 }
 
 void tcpSocket::setHints(int flag){
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
-	if(flag == 1)
+	if(flag == 1)//server
 		hints.ai_flags = AI_PASSIVE; // use my IP
 }
 
@@ -91,7 +96,6 @@ int tcpSocket::bind(){
 		}
 		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
 			perror("setsockopt");
-			exit(1);
 		}
 		if (::bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
 			close();
@@ -119,9 +123,30 @@ int tcpSocket::listen(){
 
 tcpSocket tcpSocket::accept(){
 	int newfd = ::accept(sockfd, (struct sockaddr *)&their_addr, &their_addr_size);
+	if(newfd == -1)
+		perror("accept");
 	return tcpSocket(newfd);
 }
 
 void tcpSocket::close(){
 	::close(sockfd);
+}
+
+int tcpSocket::sendMsg(string msg, int flags){
+	int bytes_sent = send(sockfd, msg.c_str(), msg.size(), flags);
+	if (bytes_sent == -1)
+		perror("send");
+	return bytes_sent;
+}
+
+string tcpSocket::recvMsg(int flags){
+	char buffer[MAXBUFFSIZE];
+	int bytes_recv = recv(sockfd, buffer, MAXBUFFSIZE - 1, flags);
+	if (bytes_recv == -1){
+		perror("recv");
+		return "";//error
+	}
+	buffer[bytes_recv] = '\0';
+	string str(buffer);
+	return str;
 }

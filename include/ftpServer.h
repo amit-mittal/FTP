@@ -16,17 +16,34 @@
 
 using namespace std;
 
+#define INITPORT 23456
+
 class ftpServer{
 	private:
+		int lastPort;
 		tcpSocket socket;
+		tcpSocket c_socket;//control socket
+		tcpSocket d_socket;//data socket
 
 	public:
+		//CONSTRUCTOR
+		ftpServer();
+
 		//GENERAL FUNCTIONS
-		void start();
+		int getNewPort();
+		int acceptClient();
+		int allocateDataPort();
+		int handleClients();
 
 		//GETTER
 		tcpSocket getSocket();
+		tcpSocket getControlSocket();
+		tcpSocket getDataSocket();
 
 		//SETTER
 		void setSocket(tcpSocket tcpSocket);
+		void setControlSocket(tcpSocket tcpSocket);
+		void setDataSocket(tcpSocket tcpSocket);
 };
+
+string getStrFromInt(int port);

@@ -16,6 +16,8 @@
 using namespace std;
 
 #define BACKLOG 10
+#define CONTROL_PORT 8182
+#define MAXBUFFSIZE 1024
 
 class tcpSocket{
 	private:
@@ -28,13 +30,18 @@ class tcpSocket{
 		socklen_t their_addr_size;
 
 	public:
-		//GENERAL FUNCTIONS
+		//CONSTRUCTORS
+		tcpSocket();
 		tcpSocket(int sockfd);
+		
+		//GENERAL FUNCTIONS
 		int connect();
 		int bind();
 		int listen();
 		tcpSocket accept();
 		void close();
+		int sendMsg(string msg, int flags);
+		string recvMsg(int flags);
 
 		//SETTERS
 		void setIp(string ip);
