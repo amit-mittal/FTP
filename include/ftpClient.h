@@ -12,6 +12,8 @@
 #include "../tcpSocket.cpp"
 
 #define IP "10.4.21.9"
+#define CLIENT_PORT 20000
+#define MAX_CMD_LEN 1024
 
 class ftpClient{
 	private:
@@ -20,7 +22,11 @@ class ftpClient{
 
 	public:
 		//GENERAL FUNCTIONS
+		int send(string str);
+		string recv();
 		int connect();
+		string getInput();
+		int sendRequest();
 
 		//GETTER
 		tcpSocket getControlSocket();
@@ -31,6 +37,4 @@ class ftpClient{
 		void setDataSocket(tcpSocket tcpSocket);
 };
 
-int getIntFromStr(string str);
-// // get sockaddr, IPv4 or IPv6:
-// void *get_in_addr(struct sockaddr *sa);
+string getStrFromInt(int val);

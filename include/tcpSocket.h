@@ -15,9 +15,17 @@
 
 using namespace std;
 
+#define DEBUG 1
 #define BACKLOG 10
 #define CONTROL_PORT 8182
 #define MAXBUFFSIZE 1024
+
+void* get_in_addr(struct sockaddr *sa){
+	if (sa->sa_family == AF_INET) {
+		return &(((struct sockaddr_in*)sa)->sin_addr);
+	}
+	return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
 
 class tcpSocket{
 	private:
@@ -35,6 +43,7 @@ class tcpSocket{
 		tcpSocket(int sockfd);
 		
 		//GENERAL FUNCTIONS
+		string getOtherIp();
 		int connect();
 		int bind();
 		int listen();

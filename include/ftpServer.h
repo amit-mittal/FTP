@@ -17,6 +17,7 @@
 using namespace std;
 
 #define INITPORT 23456
+#define IP "127.0.0.1"//remove it
 
 class ftpServer{
 	private:
@@ -31,9 +32,13 @@ class ftpServer{
 
 		//GENERAL FUNCTIONS
 		int getNewPort();
+		int send(string str);
+		string recv();
+		int start();
 		int acceptClient();
 		int allocateDataPort();
 		int handleClients();
+		int sendResponse();
 
 		//GETTER
 		tcpSocket getSocket();
@@ -46,4 +51,4 @@ class ftpServer{
 		void setDataSocket(tcpSocket tcpSocket);
 };
 
-string getStrFromInt(int port);
+string getStrFromInt(int val);

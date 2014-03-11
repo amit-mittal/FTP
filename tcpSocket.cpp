@@ -41,6 +41,18 @@ void tcpSocket::setHints(int flag){
 		hints.ai_flags = AI_PASSIVE; // use my IP
 }
 
+string tcpSocket::getOtherIp(){
+	char s[INET6_ADDRSTRLEN];
+	memset(s, 0, sizeof(s));
+	inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof(s));
+	cout << s << endl;
+	cout << s[0] << s[1] << endl;
+	stringstream str;
+	str << s;
+
+	return str.str();
+}
+
 int tcpSocket::connect(){
 	struct addrinfo *p;
 	int rv;
