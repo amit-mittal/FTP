@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <fstream>
 #include <unistd.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -15,15 +16,15 @@
 
 using namespace std;
 
-#define DEBUG 1
+#define DEBUG 0
 #define BACKLOG 10
 #define CONTROL_PORT 8182
 #define MAXBUFFSIZE 1024
 
-void* get_in_addr(struct sockaddr *sa){
+void *get_in_addr(struct sockaddr *sa){
 	if (sa->sa_family == AF_INET) {
-		return &(((struct sockaddr_in*)sa)->sin_addr);
-	}
+    		return &(((struct sockaddr_in*)sa)->sin_addr);
+	}	
 	return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
@@ -50,7 +51,7 @@ class tcpSocket{
 		tcpSocket accept();
 		void close();
 		int sendMsg(string msg, int flags);
-		string recvMsg(int flags);
+		string recvMsg(int flags, int toRead);	//toRead holds the number os bytes to read from the stream
 
 		//SETTERS
 		void setIp(string ip);

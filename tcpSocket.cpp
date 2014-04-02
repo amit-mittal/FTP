@@ -42,15 +42,25 @@ void tcpSocket::setHints(int flag){
 }
 
 string tcpSocket::getOtherIp(){
-	char s[INET6_ADDRSTRLEN];
-	memset(s, 0, sizeof(s));
-	inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof(s));
-	cout << s << endl;
-	cout << s[0] << s[1] << endl;
-	stringstream str;
-	str << s;
 
-	return str.str();
+	socklen_t len;
+	struct sockaddr_storage addr;
+	char ipstr[INET6_ADDRSTRLEN];
+
+	len = sizeof addr;
+	getpeername(getSocket(), (struct sockaddr*)&addr, &len);
+
+	// deal with both IPv4 and IPv6:
+	if (addr.ss_family == AF_INET) {
+    		struct sockaddr_in *s = (struct sockaddr_in *)&addr;
+    		inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
+	} else { // AF_INET6
+   		 struct sockaddr_in6 *s = (struct sockaddr_in6 *)&addr;
+    		inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
+	}
+
+	string str(ipstr);
+	return str;
 }
 
 int tcpSocket::connect(){
@@ -64,23 +74,23 @@ int tcpSocket::connect(){
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 1;
 	}
-
+	
 	// loop through all the results and connect to the first we can
 	for(p = servinfo; p != NULL; p = p->ai_next) {
 		if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
-			perror("client: socket");
+			perror("socket");
 			continue;
 		}
 		if (::connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
 			close();
-			perror("client: connect");
+			perror("connect");
 			continue;
 		}
 		break;
 	}
 
 	if (p == NULL) {
-		fprintf(stderr, "client: failed to connect\n");
+		fprintf(stderr, "failed to connect\n");
 		return 2;
 	}
 
@@ -146,18 +156,19 @@ void tcpSocket::close(){
 
 int tcpSocket::sendMsg(string msg, int flags){
 	int bytes_sent = send(sockfd, msg.c_str(), msg.size(), flags);
-	if (bytes_sent == -1)
+	if (bytes_sent < 0)
 		perror("send");
 	return bytes_sent;
 }
 
-string tcpSocket::recvMsg(int flags){
-	char buffer[MAXBUFFSIZE];
-	int bytes_recv = recv(sockfd, buffer, MAXBUFFSIZE - 1, flags);
-	if (bytes_recv == -1){
+string tcpSocket::recvMsg(int flags, int toRead){//toRead holds the number of bytes to be read from the socket
+	char buffer[toRead];
+	int bytes_recv = recv(sockfd, buffer, toRead-1, flags);
+	if (bytes_recv < 0){
 		perror("recv");
 		return "";//error
 	}
+
 	buffer[bytes_recv] = '\0';
 	string str(buffer);
 	return str;
